@@ -31,15 +31,21 @@ WORK_WORKTREES_DIR="$HOME/workspace/worktrees"
 
 _work_check_deps() {
     local missing=()
-    local deps=("git" "gh" "fzf" "jq" "find" "cut" "wc" "tr" "awk")
+    local deps=(git gh fzf jq find cut wc tr awk mktemp sort stat basename date)
     for cmd in "${deps[@]}"; do
-        if ! command -v "$cmd" &>/dev/null; then
+        if ! type "$cmd" &>/dev/null; then
             missing+=("$cmd")
         fi
     done
-    if ((${#missing[@]} > 0)); then
-        echo "${_C_RED}Error: Missing required dependencies: ${missing[*]}${_C_RESET}"
-        echo "Install them and try again."
+    if (( ${#missing[@]} > 0 )); then
+        echo "Error: Missing required dependencies: ${missing[*]}" >&2
+        echo "" >&2
+        echo "These commands must be available in your PATH:" >&2
+        for cmd in "${missing[@]}"; do
+            echo "  - $cmd" >&2
+        done
+        echo "" >&2
+        echo "Current PATH: $PATH" >&2
         return 1
     fi
     return 0
