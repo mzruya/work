@@ -26,6 +26,26 @@ WORK_PROJECTS_FILE="$HOME/.config/work/projects.txt"
 WORK_WORKTREES_DIR="$HOME/workspace/worktrees"
 
 # =============================================================================
+# DEPENDENCY CHECK
+# =============================================================================
+
+_work_check_deps() {
+    local missing=()
+    local deps=("git" "gh" "fzf" "jq" "find" "cut" "wc" "tr" "awk")
+    for cmd in "${deps[@]}"; do
+        if ! command -v "$cmd" &>/dev/null; then
+            missing+=("$cmd")
+        fi
+    done
+    if ((${#missing[@]} > 0)); then
+        echo "${_C_RED}Error: Missing required dependencies: ${missing[*]}${_C_RESET}"
+        echo "Install them and try again."
+        return 1
+    fi
+    return 0
+}
+
+# =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
 
@@ -825,6 +845,8 @@ _work_go() {
 # =============================================================================
 
 work() {
+    _work_check_deps || return 1
+
     local arg="$1"
     shift 2>/dev/null
 
