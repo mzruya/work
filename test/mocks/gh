@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Mock gh CLI — returns empty JSON array for any call
+echo "[]"

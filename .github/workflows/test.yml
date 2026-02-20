@@ -1,0 +1,34 @@
+name: Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shell: [bash, nu]
+    name: test (${{ matrix.shell }})
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install BATS
+        run: |
+          git clone --depth 1 https://github.com/bats-core/bats-core.git /tmp/bats-core
+          sudo /tmp/bats-core/install.sh /usr/local
+          git clone --depth 1 https://github.com/bats-core/bats-support.git /tmp/bats-support
+          git clone --depth 1 https://github.com/bats-core/bats-assert.git /tmp/bats-assert
+
+      - name: Install Nushell
+        if: matrix.shell == 'nu'
+        uses: hustcer/setup-nu@v3
+        with:
+          version: '*'
+
+      - name: Run tests
+        run: bats test/*.bats
+        env:
+          BATS_LIB_PATH: /tmp
+          WORK_SHELL: ${{ matrix.shell }}

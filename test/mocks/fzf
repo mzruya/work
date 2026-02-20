@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Mock fzf — no-op, satisfies dependency check
+exit 0
