@@ -679,7 +679,7 @@ _work_show_worktree_menu() {
 
     if [[ "$selected_value" == "__main__" ]]; then
         cd "$project_path" || return 1
-        command -v mise &>/dev/null && mise trust --quiet 2>/dev/null
+        { command -v mise &>/dev/null && mise trust --quiet 2>/dev/null; } || true
         _WORK_MENU_RESULT="done"
         return 0
     fi
@@ -687,7 +687,7 @@ _work_show_worktree_menu() {
     local path="$WORK_WORKTREES_DIR/$project_name/$selected_value"
     if [[ -d "$path" ]]; then
         cd "$path" || return 1
-        command -v mise &>/dev/null && mise trust --quiet 2>/dev/null
+        { command -v mise &>/dev/null && mise trust --quiet 2>/dev/null; } || true
         _WORK_MENU_RESULT="done"
     else
         echo "${_C_RED}Worktree not found: ${path}${_C_RESET}"
@@ -843,7 +843,7 @@ _work_go() {
 
     cd "$worktree_path" || return 1
 
-    command -v mise &>/dev/null && mise trust --quiet 2>/dev/null
+    { command -v mise &>/dev/null && mise trust --quiet 2>/dev/null; } || true
 }
 
 # =============================================================================
