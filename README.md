@@ -1,8 +1,6 @@
-# work
+# Work
 
-Stop stashing. Stop losing context. Every branch gets its own directory.
-
-`work` manages [git worktrees](https://git-scm.com/docs/git-worktree) across all your projects from a single CLI. Create a branch, get a full checkout, and `cd` into it — instantly.
+`work` manages [git worktrees](https://git-scm.com/docs/git-worktree) with multi-project management, an interactive picker, and GitHub PR status.
 
 ```
 ~/workspace/web $ work mz-auth-redesign
@@ -10,12 +8,6 @@ Fetching origin/main...
 Creating new branch from origin/main...
 ~/workspace/worktrees/web/mz-auth-redesign $
 ```
-
-## Why
-
-Switching branches with `git checkout` means rebuilding, re-running migrations, and losing your place. With worktrees, every branch is a separate directory — your editor tabs, build artifacts, and running processes stay untouched.
-
-`work` wraps git worktrees with multi-project management, an interactive picker, and GitHub PR status — so you spend less time on git plumbing and more time on code.
 
 ## Quick start
 
