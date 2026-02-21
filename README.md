@@ -1,83 +1,67 @@
 # work
 
-A CLI tool for managing git worktrees across multiple projects. Switch between branches without stashing or losing context — each branch gets its own full checkout in a central location.
+Stop stashing. Stop losing context. Every branch gets its own directory.
 
-## Features
+`work` manages [git worktrees](https://git-scm.com/docs/git-worktree) across all your projects from a single CLI. Create a branch, get a full checkout, and `cd` into it — instantly.
 
-- **Multi-project support** — register any number of git repos, manage all their worktrees from one tool
-- **Interactive fuzzy picker** — drill down from project -> worktree -> cd, with ESC to go back
-- **PR status at a glance** — see PR number, state (open/merged/closed), and CI status inline
-- **Auto-registration** — run `work <branch>` in any git repo and it registers automatically
-- **Merged branch cleanup** — `work prune` removes worktrees across all projects whose branches have been deleted from remote
-
-## Installation
-
-### Nushell
-
-```nushell
-# In your config.nu
-source ~/.config/nushell/work.nu
+```
+~/workspace/web $ work mz-auth-redesign
+Fetching origin/main...
+Creating new branch from origin/main...
+~/workspace/worktrees/web/mz-auth-redesign $
 ```
 
-### Bash / Zsh
+## Why
 
-Requires `fzf` and `jq` in addition to `git` and `gh`.
+Switching branches with `git checkout` means rebuilding, re-running migrations, and losing your place. With worktrees, every branch is a separate directory — your editor tabs, build artifacts, and running processes stay untouched.
+
+`work` wraps git worktrees with multi-project management, an interactive picker, and GitHub PR status — so you spend less time on git plumbing and more time on code.
+
+## Quick start
+
+**Bash / Zsh** (requires `fzf` and `jq`):
 
 ```bash
 # In your .bashrc or .zshrc
 source /path/to/work.sh
 ```
 
-## Usage
+**Nushell**:
 
-```bash
-# Register a project and create your first worktree
-cd ~/dev/myproject
-work mz-new-feature
-
-# Interactive switcher
-work
-
-# List worktrees with PR status
-work ls
-
-# Delete current worktree
-work rm
-
-# Clean up all merged branches across all projects
-work prune
-
-# Register a project without creating a worktree
-work add
+```nushell
+# In your config.nu
+source ~/.config/nushell/work.nu
 ```
+
+Both implementations require `git` and `gh` (GitHub CLI).
 
 ## Commands
 
-| Command | Description |
+| Command | What it does |
 |---------|-------------|
-| `work` | Interactive project -> worktree navigator |
-| `work <branch>` | Create worktree and cd into it |
-| `work ls` | List worktrees with PR status |
-| `work rm [branch]` | Delete worktree (infers current if inside one) |
+| `work` | Interactive fuzzy picker: project -> worktree -> cd |
+| `work <branch>` | Create a worktree (or cd into an existing one) |
+| `work ls` | List worktrees with PR status and CI results |
+| `work rm [branch]` | Delete a worktree and its local branch |
 | `work prune` | Clean up merged worktrees across all projects |
 | `work add [path]` | Register a git repo as a project |
 
-## How it works
+## How it looks
 
-Projects are registered in `~/.config/work/` and worktrees live under `~/workspace/worktrees/`, organized by project name:
+### Interactive navigator (`work`)
+
+Fuzzy-select a project, then a worktree. ESC goes back.
 
 ```
-~/workspace/worktrees/
-├── myproject/
-│   ├── mz-new-feature/
-│   └── mz-bugfix/
-└── other-repo/
-    └── mz-experiment/
+Select project:
+> web           3 worktrees   ~/workspace/web
+  zenpayroll    1 worktree    ~/workspace/zenpayroll
+  api           no worktrees  ~/workspace/api
 ```
 
-Each worktree is a full git checkout. Creating a worktree fetches `origin/main`, branches from it (or reuses an existing branch), and cd's you into it.
+### Worktree list (`work ls`)
 
-### PR status in `work ls`
+PR state, CI status, and links — all inline.
 
 ```
 web worktrees:
@@ -88,7 +72,41 @@ web worktrees:
   mz-add-tests      (3 days ago)   <- current
 ```
 
-## Dependencies
+### Prune merged branches (`work prune`)
 
-- `git` and `gh` (GitHub CLI) — required by both implementations
-- `fzf` and `jq` — required by the bash implementation only
+Cleans up across every registered project in one shot.
+
+```
+$ work prune
+web - fetching...
+  mz-old-feature      removed
+  mz-shipped          removed
+zenpayroll - fetching...
+  mz-done             removed
+
+Pruned 3 worktree(s) across 2 project(s)
+```
+
+## Storage layout
+
+Projects are registered in `~/.config/work/` and worktrees live under `~/workspace/worktrees/`:
+
+```
+~/workspace/worktrees/
+├── web/
+│   ├── mz-feature-auth/      # full git checkout
+│   └── mz-fix-login/
+└── api/
+    └── mz-experiment/
+```
+
+## Two implementations, same behavior
+
+| | Bash/Zsh (`work.sh`) | Nushell (`work.nu`) |
+|---|---|---|
+| Fuzzy picker | `fzf` | `input list --fuzzy` |
+| Config format | plain text | `.nuon` |
+| JSON parsing | `jq` | native `from json` |
+| Parallelism | background jobs | `par-each` |
+
+Both use the same worktree directory layout, so worktrees are cross-visible.
